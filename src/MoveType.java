@@ -1,0 +1,4 @@
+
+public enum MoveType {
+	NORMAL,CAPTURE,PROMOTE, CAPTURE_PROMOTE,CASTLE;
+}
