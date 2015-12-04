@@ -209,18 +209,18 @@ public class Rating {
 		List<Move> movesBlack = ChessMate.legalMoves(false, true);
 		if(movesBlack.size() == 0){
 			if(ChessMate.kingInCheck(false)){
-				counter -= 200000;
+				counter += 200000;
 			}else{
-				counter -= 150000;
+				counter += 150000;
 			}
 		}
 		
 		List<Move> movesWhite = ChessMate.legalMoves(true, true);
 		if(movesWhite.size() == 0){
 			if(ChessMate.kingInCheck(false)){
-				counter += 200000;
+				counter -= 200000;
 			}else{
-				counter += 150000;
+				counter -= 150000;
 			}
 		}
 		

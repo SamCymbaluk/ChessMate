@@ -128,9 +128,9 @@ public class ChessMate {
 		board[0][0] = PieceType.BLACK_ROOK;
 		board[0][1] = PieceType.BLACK_KNIGHT;
 		board[0][2] = PieceType.BLACK_BISHOP;
-		board[0][3] = PieceType.BLACK_QUEEN;
+		board[0][3] = PieceType.BLACK_QUEEN; 
 		board[0][4] = PieceType.BLACK_KING;
-		board[0][5] = PieceType.BLACK_BISHOP;
+		board[0][5] = PieceType.BLACK_BISHOP; 
 		board[0][6] = PieceType.BLACK_KNIGHT;
 		board[0][7] = PieceType.BLACK_ROOK;
 		
