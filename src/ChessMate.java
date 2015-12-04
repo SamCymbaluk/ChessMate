@@ -84,7 +84,7 @@ public class ChessMate {
 			for(Move move : legalMoves){
 				makeMove(move);
 				int rating = alphaBetaMax(-1000000,1000000, DEPTH);
-				rating += captureRating();
+				rating += Rating.captureRating();
 				
 				System.out.println("Rating: " + rating);
 				if(rating > bestRating){
@@ -110,29 +110,43 @@ public class ChessMate {
 			
 		}
 		
-
+		 
 	}
 	
-	public static int captureRating(){
-		int counter = 0;
-		for(Move move : legalMoves(true, true)){
-			switch(move.capture){
-			case BLACK_PAWN: counter -= 100 * 5;
-			break;
-			case BLACK_BISHOP: counter -= 300 * 5;
-			break;
-			case BLACK_KNIGHT: counter -= 300 * 5;
-			break;
-			case BLACK_ROOK: counter -= 500 * 5;
-			break;
-			case BLACK_QUEEN: counter -= 900 * 5;
-			default:
-			}
+	public static void initBoard(){
+		//Empty squares
+		for(int i = 0; i < 64; i++){
+			board[i/8][i%8] = PieceType.EMPTY;
 		}
-		System.out.println("Capture rating: " + counter);
 		
-		return counter;
+		//Black Pieces
+		for(int col = 0; col < 8; col++){ 
+			board[1][col] = PieceType.BLACK_PAWN;
+		}
+		board[0][0] = PieceType.BLACK_ROOK;
+		board[0][1] = PieceType.BLACK_KNIGHT;
+		board[0][2] = PieceType.BLACK_BISHOP;
+		board[0][3] = PieceType.BLACK_QUEEN;
+		board[0][4] = PieceType.BLACK_KING;
+		board[0][5] = PieceType.BLACK_BISHOP;
+		board[0][6] = PieceType.BLACK_KNIGHT;
+		board[0][7] = PieceType.BLACK_ROOK;
+		
+		//White Pieces
+		for(int col = 0; col < 8; col++){ 
+			board[6][col] = PieceType.WHITE_PAWN;
+		}
+		board[7][0] = PieceType.WHITE_ROOK;
+		board[7][1] = PieceType.WHITE_KNIGHT;
+		board[7][2] = PieceType.WHITE_BISHOP;
+		board[7][3] = PieceType.WHITE_QUEEN;
+		board[7][4] = PieceType.WHITE_KING; 
+		board[7][5] = PieceType.WHITE_BISHOP;
+		board[7][6] = PieceType.WHITE_KNIGHT;
+		board[7][7] = PieceType.WHITE_ROOK;
+		
 	}
+	
 	public static int alphaBetaMax(int alpha, int beta, int depthleft ) {
 		moves++;
 		List<Move> moves = legalMoves(false, true);
@@ -184,7 +198,7 @@ public class ChessMate {
 				if(m2.moveType != MoveType.NORMAL) rating2 += 100000;
 				undoMove(m2);
 				
-				return rating1-rating2;
+				return rating2-rating1; 
 			}
 
 	    });
@@ -645,9 +659,22 @@ public class ChessMate {
 		}
 		board[move.startPos/8][move.startPos%8] = board[move.endPos/8][move.endPos%8];
 		
-		if(move.moveType == MoveType.NORMAL || move.moveType == MoveType.PROMOTE){
-			board[move.endPos/8][move.endPos%8] = PieceType.EMPTY;
-		}else if(move.moveType == MoveType.CAPTURE || move.moveType == MoveType.CAPTURE_PROMOTE){
+		board[move.endPos/8][move.endPos%8] = PieceType.EMPTY;
+		
+		if(move.moveType == MoveType.PROMOTE){
+			if(move.endPos < 8){
+				board[move.startPos/8][move.startPos%8] = PieceType.WHITE_PAWN;
+			}else{
+				board[move.startPos/8][move.startPos%8] = PieceType.BLACK_PAWN;
+			}
+		}else if(move.moveType == MoveType.CAPTURE_PROMOTE){
+			board[move.endPos/8][move.endPos%8] = move.capture;
+			if(move.endPos < 8){
+				board[move.startPos/8][move.startPos%8] = PieceType.WHITE_PAWN;
+			}else{
+				board[move.startPos/8][move.startPos%8] = PieceType.BLACK_PAWN;
+			}
+		}else if(move.moveType == MoveType.CAPTURE){
 			board[move.endPos/8][move.endPos%8] = move.capture;
 		} //TODO add other move types
 
@@ -665,43 +692,6 @@ public class ChessMate {
 		}
 		
 		return false;
-	}
-	
-	
-	
-	
-	public static void initBoard(){
-		//Empty squares
-		for(int i = 0; i < 64; i++){
-			board[i/8][i%8] = PieceType.EMPTY;
-		}
-		
-		//Black Pieces
-		for(int col = 0; col < 8; col++){ 
-			board[1][col] = PieceType.BLACK_PAWN;
-		}
-		board[0][0] = PieceType.BLACK_ROOK;
-		board[0][1] = PieceType.BLACK_KNIGHT;
-		board[0][2] = PieceType.BLACK_BISHOP;
-		board[0][3] = PieceType.BLACK_QUEEN;
-		board[0][4] = PieceType.BLACK_KING;
-		board[0][5] = PieceType.BLACK_BISHOP;
-		board[0][6] = PieceType.BLACK_KNIGHT;
-		board[0][7] = PieceType.BLACK_ROOK;
-		
-		//White Pieces
-		for(int col = 0; col < 8; col++){ 
-			board[6][col] = PieceType.WHITE_PAWN;
-		}
-		board[7][0] = PieceType.WHITE_ROOK;
-		board[7][1] = PieceType.WHITE_KNIGHT;
-		board[7][2] = PieceType.WHITE_BISHOP;
-		board[7][3] = PieceType.WHITE_QUEEN;
-		board[7][4] = PieceType.WHITE_KING; 
-		board[7][5] = PieceType.WHITE_BISHOP;
-		board[7][6] = PieceType.WHITE_KNIGHT;
-		board[7][7] = PieceType.WHITE_ROOK;
-		
 	}
 	
 	

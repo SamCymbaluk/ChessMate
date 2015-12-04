@@ -74,6 +74,28 @@ public class Rating {
 		
 		return rating;
 	}
+	
+	public static int captureRating(){
+		int counter = 0;
+		for(Move move : ChessMate.legalMoves(true, true)){
+			switch(move.capture){
+			case BLACK_PAWN: counter -= 100;
+			break;
+			case BLACK_BISHOP: counter -= 300;
+			break;
+			case BLACK_KNIGHT: counter -= 300;
+			break;
+			case BLACK_ROOK: counter -= 500;
+			break;
+			case BLACK_QUEEN: counter -= 900;
+			default:
+			}
+		}
+		System.out.println("Capture rating: " + counter);
+		
+		return (counter/2);
+	}
+	
 	private static int ratePosition(boolean white){
 		int counter = 0;
 		if(!white){
@@ -132,15 +154,15 @@ public class Rating {
 	        int tempPosition = ChessMate.blackKingPos;
 	        for (int i=0;i<64;i++) {
 	            switch (ChessMate.board[i/8][i%8]) {
-	                case BLACK_PAWN: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=640;}}
+	                case BLACK_PAWN: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=64;}}
 	                    break;
-	                case BLACK_ROOK: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=5000;}}
+	                case BLACK_ROOK: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=500;}}
 	                    break;
-	                case BLACK_KNIGHT: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=3000;}}
+	                case BLACK_KNIGHT: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=300;}}
 	                    break;
-	                case BLACK_BISHOP: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=3000;}}
+	                case BLACK_BISHOP: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=300;}}
 	                    break;
-	                case BLACK_QUEEN: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=9000;}}
+	                case BLACK_QUEEN: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=900;}}
 	        			//System.out.println(i);
 	                    break;
 	                default:
@@ -196,7 +218,7 @@ public class Rating {
 				counter += 500;
 				break;
 			case BLACK_KNIGHT:
-				counter += 350;
+				counter += 300;
 				break;
 			case BLACK_BISHOP:
 				counter += 300;
