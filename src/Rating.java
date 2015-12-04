@@ -8,7 +8,7 @@ public class Rating {
 	static int[][] pawnBoard = 
 			{{0,0,0,0,0,0,0,0},
 			{0,0,0,0,0,0,0,0},
-			{0,10,50/ChessMate.moves,100/ChessMate.moves,100/ChessMate.moves,50/ChessMate.moves,10,0},
+			{0,10,15,20,20,15,10,0},
 			{0,0,0,25,25,0,0,0},
 			{0,0,0,0,0,0,0,0},
 			{0,0,0,0,0,0,0,0},
@@ -18,7 +18,7 @@ public class Rating {
 	static int[][] knightBoard = 
 		{{-50,-40,-30,-30,-30,-30,-40,-50},
         {-40,-20,0,0,0,0,-20,-40},
-        {-100/ChessMate.moves,0,100/ChessMate.moves,15,15,100/ChessMate.moves, 0,-100/ChessMate.moves},
+        {-40,0,15,15,15,15, 0,-40},
         {-30,5,15,20,20,15,5,-30},
         {-30,0,15, 20, 20, 15,0,-30},
         {-30,5,10,15,15,10,5,-30},
@@ -57,22 +57,17 @@ public class Rating {
 			
 	
 	public static int rating(List<Move> moves, int depth){
-		
+	
 		int rating = 0;
 			
-		rating += rateMovability(false);	
-		rating += ratePosition(false);
+		rating += rateMovability();	
+		rating += ratePosition();
 		rating += rateMaterial();
-		rating += rateAttack(false);
 		
-		rating -= rateMovability(true);	
-		rating -= ratePosition(true);
-		rating -= rateAttack(true);
-		
-		rating = rating - (depth*50);
-		
+		rating = rating * (depth + 1);
 		
 		return rating;
+		
 	}
 	
 	public static int captureRating(){
@@ -96,52 +91,27 @@ public class Rating {
 		return (counter/2);
 	}
 	
-	private static int ratePosition(boolean white){
+	private static int ratePosition(){
 		int counter = 0;
-		if(!white){
-			for(int r = 0; r < 8; r++){
-				for(int c = 0; c < 8; c++){
-					switch(ChessMate.board[r][c]){
-					case BLACK_PAWN:
-						counter += pawnBoard[r][c];
-						break;
-					case BLACK_KNIGHT:
-						counter += knightBoard[r][c];
-						break;
-					case BLACK_BISHOP:
-						counter += bishopBoard[r][c];
-						break;
-					case BLACK_ROOK:
-						counter += rookBoard[r][c];
-						break;
-					case BLACK_QUEEN:
-						counter += queenBoard[r][c];
-						break;
-					default:
-					}
-				}
-			}
-		}else{
-			for(int r = 0; r < 8; r++){
-				for(int c = 0; c < 8; c++){
-					switch(ChessMate.board[r][c]){
-					case WHITE_PAWN:
-						counter += pawnBoard[r][c];
-						break;
-					case WHITE_KNIGHT:
-						counter += knightBoard[r][c];
-						break;
-					case WHITE_BISHOP:
-						counter += bishopBoard[r][c];
-						break;
-					case WHITE_ROOK:
-						counter += rookBoard[r][c];
-						break;
-					case WHITE_QUEEN:
-						counter += queenBoard[r][c];
-						break;
-					default:
-					}
+		for(int r = 0; r < 8; r++){
+			for(int c = 0; c < 8; c++){
+				switch(ChessMate.board[r][c]){
+				case BLACK_PAWN:
+					counter += pawnBoard[r][c];
+					break;
+				case BLACK_KNIGHT:
+					counter += knightBoard[r][c];
+					break;
+				case BLACK_BISHOP:
+					counter += bishopBoard[r][c];
+					break;
+				case BLACK_ROOK:
+					counter += rookBoard[r][c];
+					break;
+				case BLACK_QUEEN:
+					counter += queenBoard[r][c];
+					break;
+				default:
 				}
 			}
 		}
@@ -233,20 +203,24 @@ public class Rating {
 		return counter;
 	}
 	
-	private static int rateMovability(boolean white){
-		List<Move> moves = ChessMate.legalMoves(white, true);
-		
+	private static int rateMovability(){
 		int counter = 0;
 		
-		counter -= 25 * (30 - moves.size());
-		
-		
-		
-		if(moves.size() == 0){
-			if(ChessMate.kingInCheck(white)){
+		List<Move> movesBlack = ChessMate.legalMoves(false, true);
+		if(movesBlack.size() == 0){
+			if(ChessMate.kingInCheck(false)){
 				counter -= 200000;
 			}else{
 				counter -= 150000;
+			}
+		}
+		
+		List<Move> movesWhite = ChessMate.legalMoves(true, true);
+		if(movesWhite.size() == 0){
+			if(ChessMate.kingInCheck(false)){
+				counter += 200000;
+			}else{
+				counter += 150000;
 			}
 		}
 		

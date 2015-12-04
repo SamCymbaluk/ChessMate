@@ -9,8 +9,7 @@ import java.util.Scanner;
 
 public class ChessMate {
 	
-	//Constants
-	final static int DEPTH = 3;
+	static int DEPTH = 3;
 	
 	//Global variables
 	public static PieceType[][] board = new PieceType[8][8];
@@ -41,6 +40,9 @@ public class ChessMate {
 			}
 		
 			
+			for(Move move : legalMoves(true,true)){
+				System.out.print(move.startPos + "->" + move.endPos + "|");
+			}
 			
 			System.out.println("Make a move!!!");
 			int startPos = scanner.nextInt();
@@ -83,8 +85,8 @@ public class ChessMate {
 			
 			for(Move move : legalMoves){
 				makeMove(move);
-				int rating = alphaBetaMax(-1000000,1000000, DEPTH);
-				rating += Rating.captureRating();
+				int rating = (DEPTH%2 == 0) ? -alphaBetaMin(-1000000,1000000, DEPTH) : alphaBetaMin(-1000000,1000000, DEPTH);  //Changed from max to min and added negative
+				//rating += Rating.captureRating();
 				
 				System.out.println("Rating: " + rating);
 				if(rating > bestRating){
@@ -151,16 +153,16 @@ public class ChessMate {
 		moves++;
 		List<Move> moves = legalMoves(false, true);
 		
-	   if ( depthleft == 0) return Rating.rating(moves, depthleft);
+	   if ( depthleft == 0 || moves.size() == 0) return Rating.rating(moves, depthleft);
+	   
 	   for (Move move : moves) {
-		 // printBoard();
-		  makeMove(move);
-	      int rating = alphaBetaMin( alpha, beta, depthleft - 1 );
-	      undoMove(move);
-	      if( rating >= beta )
+		   makeMove(move);
+		   int rating = alphaBetaMin( alpha, beta, depthleft - 1 );
+		   undoMove(move);
+		   if( rating >= beta )
 	         return beta;   // fail hard beta-cutoff
-	      if( rating > alpha )
-	         alpha = rating; // alpha acts like max in MiniMax
+		   if( rating > alpha )
+			 alpha = rating; // alpha acts like max in MiniMax
 	   }
 	   return alpha;
 	}
@@ -168,8 +170,9 @@ public class ChessMate {
 	public static int alphaBetaMin( int alpha, int beta, int depthleft ) {
 		List<Move> moves = legalMoves(true, true);
 		
-	   if ( depthleft == 0) return -Rating.rating(moves, depthleft); 
-	   for (Move move : moves) {
+	   if ( depthleft == 0 || moves.size() == 0) return -Rating.rating(moves, depthleft);
+	   
+	   for (Move move : moves) { //Move move : moves
 		   makeMove(move);
 		   int rating = alphaBetaMax( alpha, beta, depthleft - 1 ); 
 		   undoMove(move);
