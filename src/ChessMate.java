@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 
-public class ChessMate {	//TODO make capturing more important + stop suiciding to the king
+public class ChessMate {
 	
 	//Constants
 	final static int DEPTH = 3;
@@ -23,28 +23,12 @@ public class ChessMate {	//TODO make capturing more important + stop suiciding t
 	
 	public static void main(String[] args){
 		Random r = new Random();
-		//System.out.println("TEST");
 		initBoard();
 		printBoard();
-		
-		/*
-		makeMove(new Move(52,36,MoveType.NORMAL, PieceType.EMPTY));
-		printBoard();
-		makeMove(new Move(11,27,MoveType.NORMAL, PieceType.EMPTY));	
-		printBoard();
-		Move cap = new Move(36,27,MoveType.CAPTURE, PieceType.BLACK_PAWN);
-		makeMove(cap);
-		printBoard();
-		undoMove(cap);
-		printBoard();
-		*/
 		
 		Scanner scanner = new Scanner(System.in);
 		
 		while(true){
-			
-			//System.out.println("white king:"+whiteKingPos);
-			//System.out.println("black king:"+blackKingPos);
 			
 			if(legalMoves(true,true).size() == 0){
 				if(kingInCheck(true)){
@@ -64,19 +48,9 @@ public class ChessMate {	//TODO make capturing more important + stop suiciding t
 			}else{
 				makeMove(new Move(startPos, endPos, MoveType.CAPTURE, board[endPos/8][endPos%8]));
 			}
-			
-			/*
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			makeMove(legalMoves(true,true).get(r.nextInt(legalMoves(true,true).size())));
-			*/
+
 			moves++;
 			printBoard();
-			//System.out.println(whiteKingPos);
 
 			
 			whiteTurn = !whiteTurn;
@@ -115,12 +89,8 @@ public class ChessMate {	//TODO make capturing more important + stop suiciding t
 					bestRating = rating;
 				}
 				undoMove(move);
-				//if(System.currentTimeMillis() - startTime >= 20000) break;
 			}
 			System.out.println("BEST Rating: " + bestRating);
-			
-			//System.out.println(bestMove);
-			//System.out.println("Rating: " + bestRating);
 			System.out.println("Took " + (System.currentTimeMillis() - startTime) + "ms");
 			System.out.println("Moves done: " + moves);
 			makeMove(bestMove);
@@ -182,7 +152,6 @@ public class ChessMate {	//TODO make capturing more important + stop suiciding t
 		
 	   if ( depthleft == 0) return -Rating.rating(moves, depthleft); 
 	   for (Move move : moves) {
-		   //printBoard();
 		   makeMove(move);
 		   int rating = alphaBetaMax( alpha, beta, depthleft - 1 ); 
 		   undoMove(move);
@@ -215,83 +184,7 @@ public class ChessMate {	//TODO make capturing more important + stop suiciding t
 			}
 
 	    });
-		/*
-		int[] score=new int [moves.size()];
-        for (int i=0;i < moves.size();i++) {
-            makeMove(moves.get(i));
-            score[i]=-Rating.rating(moves, 1);
-            undoMove(moves.get(i));
-        }
-
-        List<Move> newListA = new ArrayList<>();
-        List<Move> newListB = moves;
-        
-        for (int i=0;i<Math.min(6,moves.size());i++) {//first few moves only
-            int max=-1000000, maxLocation=0;
-            for (int j=0;j<moves.size();j++) {
-                if (score[j]>max) {max=score[j]; maxLocation=j;}
-            }
-            score[maxLocation]=-1000000;
-            newListA.add(moves.get(maxLocation));
-            newListB.remove(maxLocation);
-        }
-        newListA.addAll(newListB);
-        return newListA;
-        */
 	}
-	/*
-	public static AB alphaBeta(int depth, int beta, int alpha, Move move, boolean whiteMove){
-		System.out.println("1 " + System.currentTimeMillis());
-		List<Move> moves = legalMoves(whiteMove, true);
-		System.out.println("2 " + System.currentTimeMillis());
-		
-		int modifier = 1;
-		if(whiteMove) modifier = -1;
-		
-		System.out.println("Depth: " + depth);
-		System.out.println("Moves: " + moves.size());
-		System.out.println("White: " + whiteMove);
-		if(depth == 0 || moves.size() == 0)return new AB(move, Rating.rating(moves, depth)*modifier);
-		//TODO sort moves
-		whiteMove = !whiteMove; 
-		
-		System.out.println("3 " + System.currentTimeMillis());
-		
-		for(int i = 0; i < moves.size(); i++){
-			makeMove(moves.get(i));
-			printBoard();
-			AB alphabeta = alphaBeta(depth -1, beta, alpha, moves.get(i), whiteMove); //Recursive call
-			int rating = alphabeta.rating;
-			undoMove(moves.get(i));
-			
-			
-			if(!whiteMove){
-				if(rating<=beta){
-					beta = rating;
-					if(depth == DEPTH)move = alphabeta.move;
-				}
-			}else{
-				if(rating>alpha){
-					alpha = rating;
-					if(depth == DEPTH)move = alphabeta.move;
-				}
-			}
-			if(alpha>=beta){
-				if(!whiteMove){
-					return new AB(move, beta);
-				}else{
-					return new AB(move, alpha);
-				}
-			}
-		}
-		if(whiteTurn){ 
-			return new AB(move, beta);
-		}else{
-			return new AB(move, alpha);
-		}
-		
-	}
-	*/
 	
 	public static List<Move> legalMoves(boolean white, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
