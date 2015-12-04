@@ -30,6 +30,7 @@ public class ChessMate {
 		
 		while(true){
 			
+			
 			if(legalMoves(true,true).size() == 0){
 				if(kingInCheck(true)){
 					System.out.println("CHECKMATE - BLACK WINS");
@@ -38,6 +39,8 @@ public class ChessMate {
 				}
 				return;
 			}
+		
+			
 			
 			System.out.println("Make a move!!!");
 			int startPos = scanner.nextInt();
@@ -103,6 +106,7 @@ public class ChessMate {
 			printBoard();
 			
 			whiteTurn = !whiteTurn;
+			
 			
 		}
 		
@@ -351,10 +355,10 @@ public class ChessMate {
 		int startRow = pos/8;
 		int startCol = pos%8;
 		
-		for(int r = -1; r < 2; r+=2){ //+1 or -1	
-			for(int c = -1; c < 2; c+=2){ //+1 or -1	
+		for(int r = -1; r < 2; r+=2){ //+1 or -1
+			for(int c = -1; c < 2; c+=2){ //+1 or -1
 				int m = 1; //Multiplier
-				while((startRow + (r*m) >= 0 && startRow + (r*m) < 8) && (startRow + (c*m) >= 0 && startRow + (c*m) < 8)){ //While inside board
+				while(true){ //While inside board //(startRow + (r*m) >= 0 && startRow + (r*m) < 8) && (startRow + (c*m) >= 0 && startRow + (c*m) < 8)
 					int newPos = pos + (8*r*m) + (c*m);
 					int newRow = startRow + (r*m);
 					int newCol = startCol + (c*m);
@@ -667,6 +671,11 @@ public class ChessMate {
 	
 	
 	public static void initBoard(){
+		//Empty squares
+		for(int i = 0; i < 64; i++){
+			board[i/8][i%8] = PieceType.EMPTY;
+		}
+		
 		//Black Pieces
 		for(int col = 0; col < 8; col++){ 
 			board[1][col] = PieceType.BLACK_PAWN;
@@ -692,11 +701,6 @@ public class ChessMate {
 		board[7][5] = PieceType.WHITE_BISHOP;
 		board[7][6] = PieceType.WHITE_KNIGHT;
 		board[7][7] = PieceType.WHITE_ROOK;
-		
-		//Black squares
-		for(int i = 16; i < 48; i++){
-			board[i/8][i%8] = PieceType.EMPTY;
-		}
 		
 	}
 	
