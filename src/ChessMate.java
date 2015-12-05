@@ -9,16 +9,19 @@ import java.util.Scanner;
 
 public class ChessMate {
 	
-	static int DEPTH = 3;
-	
 	//Global variables
+	static int DEPTH = 3;
 	public static PieceType[][] board = new PieceType[8][8];
 	public static long startTime = 0;
 	public static int moves = 0;
 	
 	static boolean whiteTurn = true;
+	
+	//Board state variables
 	static int whiteKingPos = 60;
 	static int blackKingPos = 4;
+	
+	static int lastMovePos = -1;
 	
 	public static void main(String[] args){
 		Random r = new Random();
@@ -99,6 +102,7 @@ public class ChessMate {
 			System.out.println("Took " + (System.currentTimeMillis() - startTime) + "ms");
 			System.out.println("Moves done: " + moves);
 			makeMove(bestMove);
+			lastMovePos = bestMove.endPos;
 			
 			moves++;
 			
@@ -194,11 +198,19 @@ public class ChessMate {
 				
 				makeMove(m1);
 				rating1 = Rating.rating(null, 1);
-				if(m1.moveType != MoveType.NORMAL) rating1 += 100000;
+				
+				//Move prioritization
+				if(m1.moveType != MoveType.NORMAL) rating1 += 100000; 
+				if(m1.startPos == lastMovePos) rating1 += 100000;
+
 				undoMove(m1);
 				makeMove(m2);
 				rating2 = Rating.rating(null, 1);
+				
+				//Move prioritization
 				if(m2.moveType != MoveType.NORMAL) rating2 += 100000;
+				if(m2.startPos == lastMovePos) rating2 += 100000;
+				
 				undoMove(m2);
 				
 				return rating2-rating1; 
