@@ -5,24 +5,24 @@ import java.util.List;
 public class Rating {
 	
 	//Position boards
-	static int[][] pawnBoard = 
-			{{0,0,0,0,0,0,0,0},
-			{0,0,0,0,0,0,0,0},
-			{0,10,15,20,20,15,10,0},
-			{0,0,0,25,25,0,0,0},
-			{0,0,0,0,0,0,0,0},
-			{0,0,0,0,0,0,0,0},
-			{0,0,0,0,0,0,0,0},
-			{0,0,0,0,0,0,0,0}};
+	static int[][] pawnBoard = {
+		{  0,  0,  0,  0,  0,  0,  0,  0},
+		{  0,  0,  0,  0,  0,  0,  0,  0},
+		{  0, 10, 15, 20, 20, 15, 10,  0},
+		{  5,  5,  5, 25, 25,  5,  5,  5},
+		{ 15, 15, 15, 15, 15, 15, 15, 15},
+		{ 25, 25, 25, 25, 25, 25, 25, 25},
+		{ 50, 50, 50, 50, 50, 50, 50, 50},
+		{100,100,100,100,100,100,100,100}};
 	
-	static int[][] knightBoard = 
-		{{-50,-40,-30,-30,-30,-30,-40,-50},
-        {-40,-20,0,0,0,0,-20,-40},
-        {-40,0,15,15,15,15, 0,-40},
-        {-30,5,15,20,20,15,5,-30},
-        {-30,0,15, 20, 20, 15,0,-30},
-        {-30,5,10,15,15,10,5,-30},
-        {-40,-20,0,5,5,0,-20,-40},
+	static int[][] knightBoard = {
+		{-50,-40,-30,-30,-30,-30,-40,-50},
+        {-40,-20,  0,  0,  0,  0,-20,-40},
+        {-40,  0, 15, 15, 15, 15,  0,-40},
+        {-30,  5, 15, 20, 20, 15,  5,-30},
+        {-30,  0, 15, 20, 20, 15,  0,-30},
+        {-30,  5, 10, 15, 15, 10,  5,-30},
+        {-40,-20,  0,  5,  5,  0,-20,-40},
         {-50,-40,-30,-30,-30,-30,-40,-50}};
 	
     static int rookBoard[][]={
@@ -206,6 +206,8 @@ public class Rating {
 	private static int rateMovability(){
 		int counter = 0;
 		
+		//Not sure why this works, I would expect the signs to be switched
+		
 		List<Move> movesBlack = ChessMate.legalMoves(false, true);
 		if(movesBlack.size() == 0){
 			if(ChessMate.kingInCheck(false)){
@@ -217,10 +219,10 @@ public class Rating {
 		
 		List<Move> movesWhite = ChessMate.legalMoves(true, true);
 		if(movesWhite.size() == 0){
-			if(ChessMate.kingInCheck(false)){
+			if(ChessMate.kingInCheck(true)){
 				counter -= 200000;
 			}else{
-				counter -= 150000;
+				counter += 150000;
 			}
 		}
 		

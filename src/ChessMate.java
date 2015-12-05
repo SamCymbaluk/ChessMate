@@ -13,7 +13,11 @@ public class ChessMate {
 	static int DEPTH = 3;
 	public static PieceType[][] board = new PieceType[8][8];
 	public static long startTime = 0;
-	public static int moves = 0;
+	public static int movesDone = 0;
+	
+	//Debug vars
+	public static long timeTestingCheck = 0;
+	public static int kingCheckTimes = 0;
 	
 	static boolean whiteTurn = true;
 	
@@ -47,9 +51,10 @@ public class ChessMate {
 				System.out.print(move.startPos + "->" + move.endPos + "|");
 			}
 			
-			System.out.println("Make a move!!!");
+			System.out.println("\nMake a move!!!");
 			int startPos = scanner.nextInt();
 			int endPos = scanner.nextInt();
+			
 			
 			if(board[endPos/8][endPos%8] == PieceType.EMPTY){
 				makeMove(new Move(startPos, endPos, MoveType.NORMAL, board[endPos/8][endPos%8]));
@@ -57,7 +62,7 @@ public class ChessMate {
 				makeMove(new Move(startPos, endPos, MoveType.CAPTURE, board[endPos/8][endPos%8]));
 			}
 
-			moves++;
+			movesDone++;
 			printBoard();
 
 			
@@ -97,16 +102,19 @@ public class ChessMate {
 					bestRating = rating;
 				}
 				undoMove(move);
+				if((System.currentTimeMillis() - startTime) >= 60000) break;
 			}
 			System.out.println("BEST Rating: " + bestRating);
 			System.out.println("Took " + (System.currentTimeMillis() - startTime) + "ms");
-			System.out.println("Moves done: " + moves);
+			System.out.println("Time in kingInCheck: " + (timeTestingCheck) + "ms - " + ((double)timeTestingCheck/(double)(System.currentTimeMillis() - startTime)*100D) + "% of total");
+			System.out.println("kingInCheck run " + kingCheckTimes + " times.");
+			System.out.println("Moves done: " + movesDone);
 			makeMove(bestMove);
 			lastMovePos = bestMove.endPos;
 			
-			moves++;
+			movesDone++;
 			
-			moves = 0;
+			movesDone = 0;
 			
 			
 			printBoard();
@@ -154,12 +162,12 @@ public class ChessMate {
 	}
 	
 	public static int alphaBetaMax(int alpha, int beta, int depthleft ) {
-		moves++;
 		List<Move> moves = legalMoves(false, true);
 		
 	   if ( depthleft == 0 || moves.size() == 0) return Rating.rating(moves, depthleft);
 	   
 	   for (Move move : moves) {
+		   movesDone++;
 		   makeMove(move);
 		   int rating = alphaBetaMin( alpha, beta, depthleft - 1 );
 		   undoMove(move);
@@ -177,6 +185,7 @@ public class ChessMate {
 	   if ( depthleft == 0 || moves.size() == 0) return -Rating.rating(moves, depthleft);
 	   
 	   for (Move move : moves) { //Move move : moves
+		   movesDone++;
 		   makeMove(move);
 		   int rating = alphaBetaMax( alpha, beta, depthleft - 1 ); 
 		   undoMove(move);
@@ -696,22 +705,27 @@ public class ChessMate {
 	}
 	
 	public static boolean kingInCheck(boolean white){
+		kingCheckTimes++;
+		long time = System.currentTimeMillis();
 		List<Move> moves = legalMoves(!white, false);
 		
 		for(Move move : moves){
 			if(white){
-				if(move.endPos == whiteKingPos) return true;
+				if(move.endPos == whiteKingPos){timeTestingCheck += (System.currentTimeMillis() - time); return true;}
 			}else{
-				if(move.endPos == blackKingPos)return true;
+				if(move.endPos == blackKingPos){timeTestingCheck += (System.currentTimeMillis() - time);return true;}
 			}
 		}
-		
+		timeTestingCheck += (System.currentTimeMillis() - time);
 		return false;
+		
 	}
 	
 	
 	public static boolean isWhite(PieceType piece){
-		if(piece.toString().contains("WHITE")) return true;
+		long startTime = System.currentTimeMillis();
+		if(piece.toString().contains("WHITE")){timeTestingCheck += (System.currentTimeMillis() - startTime); return true;}
+		timeTestingCheck += (System.currentTimeMillis() - startTime);
 		return false;
 	}
 	
