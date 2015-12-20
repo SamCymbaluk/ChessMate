@@ -5,7 +5,7 @@ import java.util.List;
 public class Rating {
 	
 	//Position boards
-	static int[][] pawnBoard = {
+	static short[][] pawnBoard = {
 		{  0,  0,  0,  0,  0,  0,  0,  0},
 		{  0,  0,  0,  0,  0,  0,  0,  0},
 		{  0, 10, 15, 20, 20, 15, 10,  0},
@@ -15,7 +15,7 @@ public class Rating {
 		{ 50, 50, 50, 50, 50, 50, 50, 50},
 		{100,100,100,100,100,100,100,100}};
 	
-	static int[][] knightBoard = {
+	static short[][] knightBoard = {
 		{-50,-40,-30,-30,-30,-30,-40,-50},
         {-40,-20,  0,  0,  0,  0,-20,-40},
         {-40,  0, 15, 15, 15, 15,  0,-40},
@@ -25,17 +25,17 @@ public class Rating {
         {-40,-20,  0,  5,  5,  0,-20,-40},
         {-50,-40,-30,-30,-30,-30,-40,-50}};
 	
-    static int rookBoard[][]={
-        { 0,  0,  0,  0,  0,  0,  0,  0},
-        { 5, 10, 10, 10, 10, 10, 10,  5},
-        {-5,  0,  0,  0,  0,  0,  0, -5},
-        {-5,  0,  0,  0,  0,  0,  0, -5},
-        {-5,  0,  0,  0,  0,  0,  0, -5},
-        {-5,  0,  0,  0,  0,  0,  0, -5},
-        {-5,  0,  0,  0,  0,  0,  0, -5},
-        { 0,  0,  0,  5,  5,  0,  0,  0}};
+    static short rookBoard[][]={
+        {-50,-30,-20, 10, 10,-20,-30,-50},
+        {  5, 10, 10, 10, 10, 10, 10,  5},
+        { -5,  0,  0,  0,  0,  0,  0, -5},
+        { -5,  0,  0,  0,  0,  0,  0, -5},
+        { -5,  0,  0,  0,  0,  0,  0, -5},
+        { -5,  0,  0,  0,  0,  0,  0, -5},
+        { -5,  0,  0,  0,  0,  0,  0, -5},
+        {  0,  0,  0,  5,  5,  0,  0,  0}};
     
-    static int bishopBoard[][]={
+    static short bishopBoard[][]={
         {-20,-10,-10,-10,-10,-10,-10,-20},
         {-10,  0,  0,  0,  0,  0,  0,-10},
         {-10,  0,  5, 10, 10,  5,  0,-10},
@@ -45,7 +45,7 @@ public class Rating {
         {-10,  5,  0,  0,  0,  0,  5,-10},
         {-20,-10,-10,-10,-10,-10,-10,-20}};
     
-    static int queenBoard[][]={
+    static short queenBoard[][]={
         {-20,-10,-10, -5, -5,-10,-10,-20},
         {-10,  0,  0,  0,  0,  0,  0,-10},
         {-10,  0,  5,  5,  5,  5,  0,-10},
@@ -93,8 +93,8 @@ public class Rating {
 	
 	private static int ratePosition(){
 		int counter = 0;
-		for(int r = 0; r < 8; r++){
-			for(int c = 0; c < 8; c++){
+		for(byte r = 0; r < 8; r++){
+			for(byte c = 0; c < 8; c++){
 				switch(ChessMate.board[r][c]){
 				case BLACK_PAWN:
 					counter += pawnBoard[r][c];
@@ -121,8 +121,8 @@ public class Rating {
 	public static int rateAttack(boolean white) {
         int counter=0;
         if(!white){
-	        int tempPosition = ChessMate.blackKingPos;
-	        for (int i=0;i<64;i++) {
+        	byte tempPosition = ChessMate.blackKingPos;
+	        for (byte i=0;i<64;i++) {
 	            switch (ChessMate.board[i/8][i%8]) {
 	                case BLACK_PAWN: {ChessMate.blackKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=64;}}
 	                    break;
@@ -140,8 +140,8 @@ public class Rating {
 	        }
 	        ChessMate.blackKingPos = tempPosition;
         }else{
-        	 int tempPosition = ChessMate.whiteKingPos;
- 	        for (int i=0;i<64;i++) {
+        	byte tempPosition = ChessMate.whiteKingPos;
+ 	        for (byte i=0;i<64;i++) {
  	            switch (ChessMate.board[i/8][i%8]) {
  	                case WHITE_PAWN: {ChessMate.whiteKingPos=i; if (ChessMate.kingInCheck(false)) {counter-=64;}}
  	                    break;
@@ -163,7 +163,7 @@ public class Rating {
     }
 	private static int rateMaterial(){
 		int counter = 0;
-		for(int i = 0; i < 64; i++){
+		for(byte i = 0; i < 64; i++){
 			if(ChessMate.board[i/8][i%8] == PieceType.EMPTY) continue;
 			switch(ChessMate.board[i/8][i%8]){
 			case WHITE_QUEEN:

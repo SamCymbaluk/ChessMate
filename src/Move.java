@@ -1,12 +1,12 @@
 
 public class Move {
 	
-	public int startPos;
-	public int endPos;
+	public byte startPos;
+	public byte endPos;
 	public MoveType moveType;
 	public PieceType capture;
 	
-	public Move(int startPos, int endPos, MoveType moveType, PieceType capture){
+	public Move(byte startPos, byte endPos, MoveType moveType, PieceType capture){
 		this.startPos = startPos;
 		this.endPos = endPos;
 		this.moveType = moveType;

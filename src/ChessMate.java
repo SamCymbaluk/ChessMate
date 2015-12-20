@@ -10,22 +10,23 @@ import java.util.Scanner;
 public class ChessMate {
 	
 	//Global variables
-	static int DEPTH = 3;
+	static byte DEPTH = 3;
 	public static PieceType[][] board = new PieceType[8][8];
 	public static long startTime = 0;
 	public static int movesDone = 0;
+	public static int moves2 = 0;
 	
 	//Debug vars
-	public static long timeTestingCheck = 0;
 	public static int kingCheckTimes = 0;
+	public static int legalMovesTimes = 0;
 	
 	static boolean whiteTurn = true;
 	
 	//Board state variables
-	static int whiteKingPos = 60;
-	static int blackKingPos = 4;
+	static byte whiteKingPos = 60;
+	static byte blackKingPos = 4;
 	
-	static int lastMovePos = -1;
+	static byte lastMovePos = -1;
 	
 	public static void main(String[] args){
 		Random r = new Random();
@@ -52,8 +53,8 @@ public class ChessMate {
 			}
 			
 			System.out.println("\nMake a move!!!");
-			int startPos = scanner.nextInt();
-			int endPos = scanner.nextInt();
+			byte startPos = scanner.nextByte();
+			byte endPos = scanner.nextByte();
 			
 			
 			if(board[endPos/8][endPos%8] == PieceType.EMPTY){
@@ -102,13 +103,15 @@ public class ChessMate {
 					bestRating = rating;
 				}
 				undoMove(move);
-				if((System.currentTimeMillis() - startTime) >= 60000) break;
+				if((System.currentTimeMillis() - startTime) >= 90000) break;
 			}
 			System.out.println("BEST Rating: " + bestRating);
 			System.out.println("Took " + (System.currentTimeMillis() - startTime) + "ms");
-			System.out.println("Time in kingInCheck: " + (timeTestingCheck) + "ms - " + ((double)timeTestingCheck/(double)(System.currentTimeMillis() - startTime)*100D) + "% of total");
+			System.out.println("");
 			System.out.println("kingInCheck run " + kingCheckTimes + " times.");
+			System.out.println("legalMoves run " + legalMovesTimes + " times.");
 			System.out.println("Moves done: " + movesDone);
+			System.out.println("Moves done 2: " + moves2);
 			makeMove(bestMove);
 			lastMovePos = bestMove.endPos;
 			
@@ -129,12 +132,12 @@ public class ChessMate {
 	
 	public static void initBoard(){
 		//Empty squares
-		for(int i = 0; i < 64; i++){
+		for(byte i = 0; i < 64; i++){
 			board[i/8][i%8] = PieceType.EMPTY;
 		}
 		
 		//Black Pieces
-		for(int col = 0; col < 8; col++){ 
+		for(byte col = 0; col < 8; col++){ 
 			board[1][col] = PieceType.BLACK_PAWN;
 		}
 		board[0][0] = PieceType.BLACK_ROOK;
@@ -147,7 +150,7 @@ public class ChessMate {
 		board[0][7] = PieceType.BLACK_ROOK;
 		
 		//White Pieces
-		for(int col = 0; col < 8; col++){ 
+		for(byte col = 0; col < 8; col++){ 
 			board[6][col] = PieceType.WHITE_PAWN;
 		}
 		board[7][0] = PieceType.WHITE_ROOK;
@@ -161,7 +164,7 @@ public class ChessMate {
 		
 	}
 	
-	public static int alphaBetaMax(int alpha, int beta, int depthleft ) {
+	public static int alphaBetaMax(int alpha, int beta, byte depthleft ) {
 		List<Move> moves = legalMoves(false, true);
 		
 	   if ( depthleft == 0 || moves.size() == 0) return Rating.rating(moves, depthleft);
@@ -169,7 +172,7 @@ public class ChessMate {
 	   for (Move move : moves) {
 		   movesDone++;
 		   makeMove(move);
-		   int rating = alphaBetaMin( alpha, beta, depthleft - 1 );
+		   int rating = alphaBetaMin( alpha, beta, (byte)(depthleft - 1));
 		   undoMove(move);
 		   if( rating >= beta )
 	         return beta;   // fail hard beta-cutoff
@@ -179,7 +182,7 @@ public class ChessMate {
 	   return alpha;
 	}
 		 
-	public static int alphaBetaMin( int alpha, int beta, int depthleft ) {
+	public static int alphaBetaMin( int alpha, int beta, byte depthleft ) {
 		List<Move> moves = legalMoves(true, true);
 		
 	   if ( depthleft == 0 || moves.size() == 0) return -Rating.rating(moves, depthleft);
@@ -187,7 +190,7 @@ public class ChessMate {
 	   for (Move move : moves) { //Move move : moves
 		   movesDone++;
 		   makeMove(move);
-		   int rating = alphaBetaMax( alpha, beta, depthleft - 1 ); 
+		   int rating = alphaBetaMax( alpha, beta, (byte)(depthleft - 1)); 
 		   undoMove(move);
 		   if( rating <= alpha )
 			   return alpha; // fail hard alpha-cutoff
@@ -229,8 +232,10 @@ public class ChessMate {
 	}
 	
 	public static List<Move> legalMoves(boolean white, boolean checkcheck){
+
+		legalMovesTimes++;
 		List<Move> moves = new ArrayList<>();
-		for(int i = 0; i < 64; i++){
+		for(byte i = 0; i < 64; i++){
 			if(white){
 				switch(board[i/8][i%8]){
 				case WHITE_KING:
@@ -274,34 +279,35 @@ public class ChessMate {
 					break;
 				}
 			}
-		}
+		}	
 		return moves;
 	}
 	
-	private static List<Move> kingMoves(int pos, boolean checkcheck){
+	private static List<Move> kingMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		boolean white = isWhite(board[pos/8][pos%8]);
 		
-		for(int row = -1; row <= 1; row++){
-			for(int col = -1; col <= 1; col++){
+		for(byte row = -1; row <= 1; row++){
+			for(byte col = -1; col <= 1; col++){
 				if(row == 0 && col == 0) continue; //SKIP over current position
-				int newRow = (pos/8) + row;
-				int newCol = (pos%8) + col;
+				byte newRow = (byte)((pos/8) + row);
+				byte newCol = (byte)((pos%8) + col);
 				if(newRow > 7 || newRow < 0 || newCol > 7 || newCol < 0) continue;  //Skip over moves outside of board.
 				
 				if(isWhite(board[newRow][newCol]) == white && board[newRow][newCol] != PieceType.EMPTY) continue; //Can't move to squares occupied by own player's piece
 
 				if(board[newRow][newCol] == PieceType.EMPTY){ //No Capture
-					Move move = new Move(pos, (newRow*8) + newCol, MoveType.NORMAL, PieceType.EMPTY);
+					Move move = new Move(pos, (byte)((newRow*8) + newCol), MoveType.NORMAL, PieceType.EMPTY);
 					if(checkcheck){
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}else{
 						moves.add(move);
 					}
 				}else if(isWhite(board[newRow][newCol]) != white){ //Capture
-					Move move = new Move(pos, (newRow*8) + newCol, MoveType.CAPTURE, board[newRow][newCol]);
+					Move move = new Move(pos, (byte)((newRow*8) + newCol), MoveType.CAPTURE, board[newRow][newCol]);
 					if(checkcheck){
 						makeMove(move);
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
@@ -317,24 +323,25 @@ public class ChessMate {
 		return moves;
 	}
 	
-	private static List<Move> rookMoves(int pos, boolean checkcheck){
+	private static List<Move> rookMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		boolean white = isWhite(board[pos/8][pos%8]);
-		int startRow = pos/8;
-		int startCol = pos%8;
+		byte startRow = (byte) (pos/8);
+		byte startCol = (byte) (pos%8);
 		
-		for(int i = -1; i < 2; i+=2){ //+1 or -1	
-			int m = 1; //Multiplier
+		for(byte i = -1; i < 2; i+=2){ //+1 or -1	
+			byte m = 1; //Multiplier
 			
 			//LEFT - RIGHT
 			while(startCol + (i*m) >= 0 && startCol + (i*m) < 8){ //While on board
-				int newPos = pos + (i*m);
+				byte newPos = (byte) (pos + (i*m));
 				if(isWhite(board[newPos/8][newPos%8]) == white && board[newPos/8][newPos%8] != PieceType.EMPTY)break; //Can't run into own piece
 				
 				if(board[newPos/8][newPos%8] == PieceType.EMPTY){ //No Capture
 					Move move = new Move(pos, newPos, MoveType.NORMAL, PieceType.EMPTY);
 					if(checkcheck){
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}else{
@@ -344,6 +351,7 @@ public class ChessMate {
 					Move move = new Move(pos, newPos, MoveType.CAPTURE, board[newPos/8][newPos%8]);
 					if(checkcheck){
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}else{
@@ -357,13 +365,14 @@ public class ChessMate {
 			m=1;
 			//UP - DOWN
 			while(startRow + (i*m) >= 0 && startRow + (i*m) < 8){ //While on board
-				int newPos = pos + (8*i*m);
+				byte newPos = (byte) (pos + (8*i*m));
 				if(isWhite(board[newPos/8][newPos%8]) == white && board[newPos/8][newPos%8] != PieceType.EMPTY)break; //Can't run into own piece
 				
 				if(board[newPos/8][newPos%8] == PieceType.EMPTY){ //No Capture
 					Move move = new Move(pos, newPos, MoveType.NORMAL, PieceType.EMPTY);
 					if(checkcheck){
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}else{
@@ -373,6 +382,7 @@ public class ChessMate {
 					Move move = new Move(pos, newPos, MoveType.CAPTURE, board[newPos/8][newPos%8]);
 					if(checkcheck){
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}else{
@@ -387,19 +397,19 @@ public class ChessMate {
 		return moves;
 	}
 	
-	private static List<Move> bishopMoves(int pos, boolean checkcheck){
+	private static List<Move> bishopMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		boolean white = isWhite(board[pos/8][pos%8]);
-		int startRow = pos/8;
-		int startCol = pos%8;
+		byte startRow = (byte) (pos/8);
+		byte startCol = (byte) (pos%8);
 		
-		for(int r = -1; r < 2; r+=2){ //+1 or -1
-			for(int c = -1; c < 2; c+=2){ //+1 or -1
-				int m = 1; //Multiplier
+		for(byte r = -1; r < 2; r+=2){ //+1 or -1
+			for(byte c = -1; c < 2; c+=2){ //+1 or -1
+				byte m = 1; //Multiplier
 				while(true){ //While inside board //(startRow + (r*m) >= 0 && startRow + (r*m) < 8) && (startRow + (c*m) >= 0 && startRow + (c*m) < 8)
-					int newPos = pos + (8*r*m) + (c*m);
-					int newRow = startRow + (r*m);
-					int newCol = startCol + (c*m);
+					byte newPos = (byte) (pos + (8*r*m) + (c*m));
+					byte newRow = (byte) (startRow + (r*m));
+					byte newCol = (byte) (startCol + (c*m));
 					
 					if(newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) break; //Prevent teleportation
 					if(newPos > 63 || newPos < 0) break; //Can't be outside board
@@ -410,6 +420,7 @@ public class ChessMate {
 							Move move = new Move(pos, newPos, MoveType.NORMAL, PieceType.EMPTY);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -419,6 +430,7 @@ public class ChessMate {
 							Move move = new Move(pos, newPos, MoveType.CAPTURE, board[newPos/8][newPos%8]);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -436,7 +448,7 @@ public class ChessMate {
 		return moves;
 	}
 
-	private static List<Move> queenMoves(int pos, boolean checkcheck){
+	private static List<Move> queenMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		
 		//Bishop and rook combined
@@ -446,28 +458,30 @@ public class ChessMate {
 		return moves;
 	}
 	
-	private static List<Move> knightMoves(int pos, boolean checkcheck){
+	private static List<Move> knightMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		boolean white = isWhite(board[pos/8][pos%8]);
-		int startRow = pos/8;
-		int startCol = pos%8;
+		byte startRow = (byte) (pos/8);
+		byte startCol = (byte) (pos%8);
 		
 		for(int r = -1; r <= 1; r+=2){
 			for(int c = -1; c <= 1; c+=2){
 				try{ //In case move is off board
 					if(board[startRow + r][startCol + (2*c)] == PieceType.EMPTY){
-						Move move = new Move(pos, pos + (r*8) + (2*c), MoveType.NORMAL, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos + (r*8) + (2*c)), MoveType.NORMAL, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
 							moves.add(move);
 						}
 					}else if(isWhite(board[startRow + r][startCol + (2*c)]) != white){
-						Move move = new Move(pos, pos + (r*8) + (2*c), MoveType.CAPTURE, board[startRow + r][startCol + (2*c)]);
+						Move move = new Move(pos, (byte)(pos + (r*8) + (2*c)), MoveType.CAPTURE, board[startRow + r][startCol + (2*c)]);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
@@ -477,17 +491,19 @@ public class ChessMate {
 				}catch(Exception e){}
 				try{ //In case move is off board
 					if(board[startRow + (r*2)][startCol + c] == PieceType.EMPTY){
-						Move move = new Move(pos, pos + (r*8*2)+ c, MoveType.NORMAL, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos + (r*8*2)+ c), MoveType.NORMAL, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
 							moves.add(move);
 						}
 					}else if(isWhite(board[startRow + (r*2)][startCol + c]) != white){
-						Move move = new Move(pos, pos + (r*8*2) + c, MoveType.CAPTURE, board[startRow + (2*r)][startCol + c]);
+						Move move = new Move(pos, (byte)(pos + (r*8*2) + c), MoveType.CAPTURE, board[startRow + (2*r)][startCol + c]);
 						makeMove(move);
+						moves2++;
 						if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 						undoMove(move);
 					}
@@ -497,21 +513,22 @@ public class ChessMate {
 		return moves;
 	}
 	
-	private static List<Move> pawnMoves(int pos, boolean checkcheck){
+	private static List<Move> pawnMoves(byte pos, boolean checkcheck){
 		List<Move> moves = new ArrayList<>();
 		boolean white = isWhite(board[pos/8][pos%8]);
-		int startRow = pos/8;
-		int startCol = pos%8;
+		byte startRow = (byte) (pos/8);
+		byte startCol = (byte) (pos%8);
 		
-		int direction = white ? -1 : 1;
+		byte direction = (byte) (white ? -1 : 1);
 		
 		if(white){
 			if(pos > 15){ //No promotion + direction
 				try{
 					if(board[startRow + direction][startCol] == PieceType.EMPTY){ //Move one forward;
-						Move move = new Move(pos, pos+(8*direction), MoveType.NORMAL, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos+(8*direction)), MoveType.NORMAL, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
@@ -522,9 +539,10 @@ public class ChessMate {
 				try{
 					if(startRow == 6){ //Move two forward
 						if(board[startRow + direction][startCol] == PieceType.EMPTY && board[startRow + direction*2][startCol] == PieceType.EMPTY){
-							Move move = new Move(pos, pos+(16*direction), MoveType.NORMAL, PieceType.EMPTY);
+							Move move = new Move(pos, (byte)(pos+(16*direction)), MoveType.NORMAL, PieceType.EMPTY);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -533,12 +551,13 @@ public class ChessMate {
 						}
 					} //Capture
 				}catch(Exception e){}
-				for(int c = -1; c <= 1; c+=2){
+				for(byte c = -1; c <= 1; c+=2){
 					try{
 						if(board[startRow + direction][startCol + c] != PieceType.EMPTY && isWhite(board[startRow + direction][startCol + c]) != white){ //Enemy Piece
-							Move move = new Move(pos, pos+(8*direction) + c, MoveType.CAPTURE, board[startRow + direction][startCol + c]);
+							Move move = new Move(pos, (byte)(pos+(8*direction) + c), MoveType.CAPTURE, board[startRow + direction][startCol + c]);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -548,12 +567,13 @@ public class ChessMate {
 					}catch(Exception e){}
 				}
 			}else{ //PROMOTION
-				for(int c = -1; c <= 1; c+=2){
+				for(byte c = -1; c <= 1; c+=2){
 					try{
 						if(board[startRow + direction][startCol + c] != PieceType.EMPTY && isWhite(board[startRow + direction][startCol + c]) != white){ //Enemy Piece
-							Move move = new Move(pos, pos+(8*direction) + c, MoveType.CAPTURE_PROMOTE, board[startRow + direction][startCol + c]);
+							Move move = new Move(pos, (byte)(pos+(8*direction) + c), MoveType.CAPTURE_PROMOTE, board[startRow + direction][startCol + c]);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -564,9 +584,10 @@ public class ChessMate {
 				}
 				try{
 					if(board[startRow + direction][startCol] == PieceType.EMPTY){ //Move one forward;
-						Move move = new Move(pos, pos+(8*direction), MoveType.PROMOTE, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos+(8*direction)), MoveType.PROMOTE, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
@@ -579,9 +600,10 @@ public class ChessMate {
 			if(pos < 48){ //No promotion + direction
 				try{
 					if(board[startRow + direction][startCol] == PieceType.EMPTY){ //Move one forward;
-						Move move = new Move(pos, pos+(8*direction), MoveType.NORMAL, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos+(8*direction)), MoveType.NORMAL, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
@@ -592,9 +614,10 @@ public class ChessMate {
 				try{
 					if(startRow == 1){ //Move two forward
 						if(board[startRow + direction][startCol] == PieceType.EMPTY && board[startRow + direction*2][startCol] == PieceType.EMPTY){
-							Move move = new Move(pos, pos+(16*direction), MoveType.NORMAL, PieceType.EMPTY);
+							Move move = new Move(pos, (byte)(pos+(16*direction)), MoveType.NORMAL, PieceType.EMPTY);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -603,12 +626,13 @@ public class ChessMate {
 						}
 					} //Capture
 				}catch(Exception e){}
-				for(int c = -1; c <= 1; c+=2){
+				for(byte c = -1; c <= 1; c+=2){
 					try{
 						if(board[startRow + direction][startCol + c] != PieceType.EMPTY && isWhite(board[startRow + direction][startCol + c]) != white){ //Enemy Piece
-							Move move = new Move(pos, pos+(8*direction) + c, MoveType.CAPTURE, board[startRow + direction][startCol + c]);
+							Move move = new Move(pos, (byte)(pos+(8*direction) + c), MoveType.CAPTURE, board[startRow + direction][startCol + c]);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -618,12 +642,13 @@ public class ChessMate {
 					}catch(Exception e){}
 				}
 			}else{ //Promotion
-				for(int c = -1; c <= 1; c+=2){
+				for(byte c = -1; c <= 1; c+=2){
 					try{
 						if(board[startRow + direction][startCol + c] != PieceType.EMPTY && isWhite(board[startRow + direction][startCol + c]) != white){ //Enemy Piece
-							Move move = new Move(pos, pos+(8*direction) + c, MoveType.CAPTURE_PROMOTE, board[startRow + direction][startCol + c]);
+							Move move = new Move(pos, (byte)(pos+(8*direction) + c), MoveType.CAPTURE_PROMOTE, board[startRow + direction][startCol + c]);
 							if(checkcheck){
 								makeMove(move);
+								moves2++;
 								if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 								undoMove(move);
 							}else{
@@ -634,9 +659,10 @@ public class ChessMate {
 				}
 				try{
 					if(board[startRow + direction][startCol] == PieceType.EMPTY){ //Move one forward;
-						Move move = new Move(pos, pos+(8*direction), MoveType.PROMOTE, PieceType.EMPTY);
+						Move move = new Move(pos, (byte)(pos+(8*direction)), MoveType.PROMOTE, PieceType.EMPTY);
 						if(checkcheck){
 							makeMove(move);
+							moves2++;
 							if(!kingInCheck(white))moves.add(move); //Safe to move to location -> add to possible moves
 							undoMove(move);
 						}else{
@@ -711,12 +737,11 @@ public class ChessMate {
 		
 		for(Move move : moves){
 			if(white){
-				if(move.endPos == whiteKingPos){timeTestingCheck += (System.currentTimeMillis() - time); return true;}
+				if(move.endPos == whiteKingPos)return true;
 			}else{
-				if(move.endPos == blackKingPos){timeTestingCheck += (System.currentTimeMillis() - time);return true;}
+				if(move.endPos == blackKingPos)return true;
 			}
 		}
-		timeTestingCheck += (System.currentTimeMillis() - time);
 		return false;
 		
 	}
@@ -724,16 +749,15 @@ public class ChessMate {
 	
 	public static boolean isWhite(PieceType piece){
 		long startTime = System.currentTimeMillis();
-		if(piece.toString().contains("WHITE")){timeTestingCheck += (System.currentTimeMillis() - startTime); return true;}
-		timeTestingCheck += (System.currentTimeMillis() - startTime);
+		if(piece.toString().contains("WHITE")) return true;
 		return false;
 	}
 	
 	public static void printBoard(){
-		for(int row = 0; row < 8; row++){
+		for(byte row = 0; row < 8; row++){
 			System.out.println("");
 			System.out.print("|");
-			for(int col = 0; col < 8; col++){
+			for(byte col = 0; col < 8; col++){
 				switch(board[row][col]){
 				case WHITE_KING:
 					System.out.print("A|");
